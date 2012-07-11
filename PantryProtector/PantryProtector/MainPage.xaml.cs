@@ -19,6 +19,22 @@ namespace PantryProtector
 {
     public partial class MainPage : PhoneApplicationPage, INotifyPropertyChanged
     {
+        private IntLoopingDataSource _quantityList = new IntLoopingDataSource() { MinValue = 1, MaxValue = 60, SelectedItem = 1 };
+        public IntLoopingDataSource QuantityList
+        {
+            get
+            {
+                return _quantityList;
+            }
+            set
+            {
+                if (_quantityList != value)
+                {
+                    _quantityList = value;
+                    NotifyPropertyChanged("QuantityList");
+                }
+            }
+        }
         private ItemController itemController;
         private ObservableCollection<Item> _items;
         public ObservableCollection<Item> Items
@@ -40,8 +56,14 @@ namespace PantryProtector
         // Constructor
         public MainPage()
         {
+            // Standard Silverlight initialization function
             InitializeComponent();
 
+            // Populate the Quantity List
+            this.QuantityPicker.DataSource = new IntLoopingDataSource() { MinValue = 1, MaxValue = 10, SelectedItem = 1 };
+            //for (int i = 0; i < 50; i++) _quantityList.Add(i);
+            
+            // Create a controller to handle database transactions
             itemController = new ItemController();
 
             // Data context and observable collection are children of the main page.
@@ -57,16 +79,37 @@ namespace PantryProtector
             base.OnNavigatedTo(e);
         }
 
-        private void newItemTextBox_GotFocus(object sender, RoutedEventArgs e)
+        /***********************************************************************
+         *              Clear Text Boxes on Focus
+         ***********************************************************************/
+        private void newItemNameTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             // Clear the text box when it gets focus.
-            newItemTextBox.Text = String.Empty;
+            ItemNameTextBox.Text = String.Empty;
         }
 
+        private void newItemDescriptionTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear the text box when it gets focus.
+            ItemDescriptionTextBox.Text = String.Empty;
+        }
+        
+        private void newItemLocationTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Clear the text box when it gets focus.
+            ItemLocationTextBox.Text = String.Empty;
+        }
+
+        /***********************************************************************
+         *              Add New Item
+         ***********************************************************************/
         private void newItemAddButton_Click(object sender, RoutedEventArgs e)
         {
             // Create a new item based on the text box.
-            Item newItem = new Item { ItemName = newItemTextBox.Text };
+            Item newItem = new Item {   ItemName = ItemNameTextBox.Text,
+                                        ItemDescription = ItemDescriptionTextBox.Text,
+                                        ItemLocation = ItemLocationTextBox.Text,
+                                        ItemExpiration = ExpirationDatePicker.ValueString};
 
             // Add an item to the observable collection.
             Items.Add(newItem);
@@ -75,6 +118,9 @@ namespace PantryProtector
             itemController.InsertItem(newItem);
         }
 
+        /***********************************************************************
+         *              Navigating away
+         ***********************************************************************/
         protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
         {
             // Call the base method.
@@ -84,7 +130,10 @@ namespace PantryProtector
             itemController.SubmitChanges();
         }
 
-        private void deleteTaskButton_Click(object sender, RoutedEventArgs e)
+        /***********************************************************************
+         *              Delete Item
+         ***********************************************************************/
+        private void deleteItemButton_Click(object sender, RoutedEventArgs e)
         {
             // Cast parameter as a button.
             var button = sender as Button;
@@ -119,5 +168,15 @@ namespace PantryProtector
         }
 
         #endregion
+
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GroceryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }       
 }

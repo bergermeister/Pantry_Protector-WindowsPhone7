@@ -40,9 +40,38 @@ namespace PantryProtector
         }
 
         // Insert a new item into the database
-        public void InsertItem(Item newItem)
+        public Boolean InsertItem(Item newItem)
         {
-            itemDB.Items.InsertOnSubmit(newItem);
+            var itemsInDB = from Item item in itemDB.Items
+                            where item.ItemName.Equals(newItem.ItemName)
+                            select item;
+            // If no duplicate entires exist, create a new item
+            if (itemsInDB.Count() == 0)
+            {
+                // Insert the new item.
+                itemDB.Items.InsertOnSubmit(newItem);
+
+                // Save the changes
+                SubmitChanges();
+
+                return true;
+            }
+            // Else we already have an entry, so add the quantities.
+            else
+            {
+                // Add the quantities together
+                Item item = itemsInDB.First();
+                item.ItemQuantity += newItem.ItemQuantity;
+
+                // Save the changes
+                SubmitChanges();
+
+                return true;
+            }
+            // Add item to the database
+
+            // We should never reach this.
+            return false;
         }
 
         // Remove an item from the database

@@ -43,7 +43,7 @@ namespace PantryProtector
         // Define item name: private field, public property, and database column
         private string _itemName;
 
-        [Column]
+        [Column(CanBeNull = false)]
         public string ItemName
         {
             get
@@ -64,7 +64,7 @@ namespace PantryProtector
         // Define item quantity
         private int _itemQuantity;
 
-        [Column]
+        [Column(CanBeNull = false)]
         public int ItemQuantity
         {
             get
@@ -120,6 +120,27 @@ namespace PantryProtector
                     NotifyPropertyChanging("ItemLocation");
                     _itemLocation = value;
                     NotifyPropertyChanged("ItemLocation");
+                }
+            }
+        }
+
+        // Define item expiration date
+        private string _itemExpiration;
+
+        [Column(CanBeNull = false)]
+        public string ItemExpiration
+        {
+            get
+            {
+                return _itemExpiration;
+            }
+            set
+            {
+                if (_itemExpiration != value)
+                {
+                    NotifyPropertyChanging("ItemExpiration");
+                    _itemExpiration = value;
+                    NotifyPropertyChanged("ItemExpiration");
                 }
             }
         }
