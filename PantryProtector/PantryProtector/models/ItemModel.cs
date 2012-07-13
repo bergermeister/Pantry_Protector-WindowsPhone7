@@ -21,7 +21,9 @@ namespace PantryProtector
         // Define ID: private field, public property, and database column.
         private int _itemId;
 
-        // Identifier column that is automatically populated by the database. This column is also the primary key, for which a database index is automatically created.
+        /***********************************************************************
+         *                      Column: PrimaryKey
+         ***********************************************************************/
         [Column(IsPrimaryKey = true, IsDbGenerated = true, DbType = "INT NOT NULL Identity", CanBeNull = false, AutoSync = AutoSync.OnInsert)]
         public int ItemId
         {
@@ -40,7 +42,9 @@ namespace PantryProtector
             }
         }
 
-        // Define item name: private field, public property, and database column
+        /***********************************************************************
+         *                      Column: ItemName
+         ***********************************************************************/
         private string _itemName;
 
         [Column(CanBeNull = false)]
@@ -61,7 +65,9 @@ namespace PantryProtector
             }
         }
 
-        // Define item quantity
+        /***********************************************************************
+         *                      Column: ItemQuantity
+         ***********************************************************************/
         private int _itemQuantity;
 
         [Column(CanBeNull = false)]
@@ -82,7 +88,9 @@ namespace PantryProtector
             }
         }
 
-        // Define item description
+        /***********************************************************************
+         *                      Column: ItemDescription
+         ***********************************************************************/
         private string _itemDescription;
 
         [Column]
@@ -103,7 +111,9 @@ namespace PantryProtector
             }
         }
 
-        // Define item location
+        /***********************************************************************
+         *                      Column: ItemLocation
+         ***********************************************************************/
         private string _itemLocation;
 
         [Column]
@@ -124,7 +134,9 @@ namespace PantryProtector
             }
         }
 
-        // Define item expiration date
+        /***********************************************************************
+         *                      Column: ItemExpiration
+         ***********************************************************************/
         private string _itemExpiration;
 
         [Column(CanBeNull = false)]
@@ -145,7 +157,56 @@ namespace PantryProtector
             }
         }
 
-        // Define completion value: private field, public property, and database column.
+
+        /***********************************************************************
+         *                      Column: ItemCategory
+         ***********************************************************************/
+        private string _itemCategory;
+
+        [Column]
+        public string ItemCategroy
+        {
+            get
+            {
+                return _itemCategory;
+            }
+            set
+            {
+                if (_itemCategory != value)
+                {
+                    NotifyPropertyChanging("ItemCategory");
+                    _itemCategory = value;
+                    NotifyPropertyChanged("ItemCategroy");
+                }
+            }
+        }
+
+        /***********************************************************************
+         *                      Column: ItemInShoppingList
+         ***********************************************************************/
+        private bool _itemInShoppingList;
+
+        [Column(CanBeNull = false)]
+        public bool ItemInShoppingList
+        {
+            get
+            {
+                return _itemInShoppingList;
+            }
+            set
+            {
+                if (_itemInShoppingList != value)
+                {
+                    NotifyPropertyChanging("InGroceryList");
+                    _itemInShoppingList = value;
+                    NotifyPropertyChanged("InGroceryList");
+                }
+            }
+        }
+
+        /***********************************************************************
+         *                      Column: IsComplete
+         ***********************************************************************/
         private bool _isComplete;
 
         [Column]
@@ -166,10 +227,15 @@ namespace PantryProtector
             }
         }
 
-        // Version column aids update performance.
+        /***********************************************************************
+         *                      Column: Version
+         ***********************************************************************/
         [Column(IsVersion = true)]
         private Binary _version;
 
+        /***********************************************************************
+         *                      Region: Notify
+         ***********************************************************************/
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -65,6 +65,8 @@ namespace PantryProtector
                     // Create the Database
                     db.CreateDatabase();
                 }
+                //db.DeleteDatabase();
+                //db.CreateDatabase();
             }
         }
 

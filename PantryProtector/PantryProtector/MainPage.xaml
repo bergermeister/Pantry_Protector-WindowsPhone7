@@ -5,11 +5,11 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
-    xmlns:toolkit2="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:loop="clr-namespace:PantryProtector;assembly=PantryProtector"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -19,186 +19,95 @@
     <!--LayoutRoot is the root grid where all page content is placed.-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <controls:Pivot Title="PANTRY PROTECTOR">
-            <!--Pivot item one-->
-            <controls:PivotItem Header="Grocery List">
-                <!--ContentPanel - place additional content here.-->
-                <Grid x:Name="GroceryListPanel" Grid.Row="1" Margin="12,0,12,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="200" />
-                        <ColumnDefinition Width="50" MinWidth="50" />
-                        <ColumnDefinition Width="100" MinWidth="120" />
-                        <ColumnDefinition Width="50" MinWidth="75" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
-                        Text="Name" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="#" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="Expir." FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="2" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="X" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="3" Grid.Row="0" VerticalAlignment="Center"/>
-                    <!-- Bind the list box to the observable collection. -->
-                    <ListBox x:Name="GroceryListBox" ItemsSource="{Binding Items}" Margin="12,0" AllowDrop="False" Grid.Row="1" Grid.ColumnSpan="4" SelectionChanged="GroceryListBox_SelectionChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid HorizontalAlignment="Stretch" Width="440">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" MinWidth="200" />
-                                        <ColumnDefinition Width="50" MinWidth="50" />
-                                        <ColumnDefinition Width="100" MinWidth="120" />
-                                        <ColumnDefinition Width="50" MinWidth="75" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Text="{Binding ItemName}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="0" Grid.Row="1"
-                                        VerticalAlignment="Center"/>
-                                    <TextBlock
-                                        Text="{Binding ItemQuantity}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="1" Grid.Row="1"
-                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <TextBlock
-                                        Text="{Binding ItemExpiration}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="2" Grid.Row="1"
-                                        VerticalAlignment="Center" HorizontalAlignment="Stretch" />
-                                    <Button
-                                        Grid.Column="3" Grid.Row="1"
-                                        x:Name="deleteTaskButton"
-                                        BorderThickness="0"                                
-                                        Margin="0"
-                                        Click="deleteItemButton_Click" HorizontalAlignment="Right">
-                                        <Image Source="appbar.delete.rest.png"/>
-                                    </Button>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
+        <controls:Pivot Title="PANTRY PROTECTOR" x:Name="PantryProtectorPivot">
+            <!--Shopping list-->
+            <controls:PivotItem Header="Shopping List">
+                <!-- List Content -->
+                <ListBox x:Name="ShoppingListBox" ItemsSource="{Binding ItemsNeeded}" AllowDrop="False" SelectionChanged="ShoppingListBox_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Width="Auto" MinWidth="460" Height="Auto" HorizontalAlignment="Stretch" >
+                                <toolkit:ContextMenuService.ContextMenu>
+                                    <toolkit:ContextMenu>
+                                        <toolkit:MenuItem Header="Delete" Click="ItemDeleteMenu_Click" />
+                                    </toolkit:ContextMenu>
+                                </toolkit:ContextMenuService.ContextMenu>
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Height="80" Width="Auto" MinWidth="400">
+                                        <!--<Image Source="{Binding Type}" Width="80" Height="80" />-->
+                                        <Image Source="appbar.basecircle.rest.png" Width="80" Height="80" />
+                                        <StackPanel Orientation="Vertical" Height="80">
+                                            <StackPanel Orientation="Horizontal" Height="40" MinWidth="240">
+                                                <TextBlock
+                                                    Text="{Binding ItemName}" FontSize="{StaticResource PhoneFontSizeLarge}"
+                                                    HorizontalAlignment ="Stretch" VerticalAlignment="Center" Height="40"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Height="40" MinWidth="240">
+                                                <TextBlock
+                                                    Text="{Binding ItemQuantity}" FontSize="{StaticResource PhoneFontSizeLarge}"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center" Height="40" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Button
+                                            x:Name="TransferItemToInventoryButton"
+                                            Height="100" Width="100"                            
+                                            Click="transferItemFromShoppingListButton_Click" 
+                                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Image Source="appbar.Check.rest.png"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </controls:PivotItem>
             
             <!--Inventory-->
             <controls:PivotItem Header="Inventory">
-                <!--ContentPanel - place additional content here.-->
-                <Grid x:Name="InventoryListPanel" Grid.Row="1" Margin="12,0,12,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="200" />
-                        <ColumnDefinition Width="50" MinWidth="50" />
-                        <ColumnDefinition Width="100" MinWidth="120" />
-                        <ColumnDefinition Width="50" MinWidth="75" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
-                        Text="Name" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="#" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="Expir." FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="2" Grid.Row="0" VerticalAlignment="Center"/>
-                    <TextBlock
-                        Text="X" FontSize="{StaticResource PhoneFontSizeLarge}" HorizontalAlignment="Center"
-                        Grid.Column="3" Grid.Row="0" VerticalAlignment="Center"/>
-                    <!-- Bind the list box to the observable collection. -->
-                    <ListBox x:Name="InventoryListBox" ItemsSource="{Binding Items}" 
-                     Grid.Row="1" Margin="12, 0, 12, 0" AllowDrop="False">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid HorizontalAlignment="Stretch" Width="440">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" MinWidth="200" />
-                                        <ColumnDefinition Width="50" MinWidth="50" />
-                                        <ColumnDefinition Width="100" MinWidth="120" />
-                                        <ColumnDefinition Width="50" MinWidth="75" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Text="{Binding ItemName}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="0" Grid.Row="1"
-                                        VerticalAlignment="Center"/>
-                                    <TextBlock
-                                        Text="{Binding ItemQuantity}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="1" Grid.Row="1"
-                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <TextBlock
-                                        Text="{Binding ItemExpiration}"
-                                        FontSize="{StaticResource PhoneFontSizeLarge}"
-                                        Grid.Column="2" Grid.Row="1"
-                                        VerticalAlignment="Center" HorizontalAlignment="Stretch" />
-                                    <Button
-                                        Grid.Column="3" Grid.Row="1"
-                                        x:Name="deleteTaskButton"
-                                        BorderThickness="0"                                
-                                        Margin="0"
-                                        Click="deleteItemButton_Click" HorizontalAlignment="Right">
-                                        <Image Source="appbar.delete.rest.png"/>
-                                    </Button>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
+                <ListBox x:Name="InventoryListBox" ItemsSource="{Binding ItemsNotNeeded}" AllowDrop="False">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Width="Auto" MinWidth="460" Height="Auto" HorizontalAlignment="Stretch" Click="ItemEditButton_Click">
+                                <toolkit:ContextMenuService.ContextMenu>
+                                    <toolkit:ContextMenu>
+                                        <toolkit:MenuItem Header="Delete" Click="ItemDeleteMenu_Click" />
+                                    </toolkit:ContextMenu>
+                                </toolkit:ContextMenuService.ContextMenu>
+                                <Button.Content>                                
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Height="80" Width="Auto" MinWidth="400">
+                                        <!--<Image Source="{Binding Type}" Width="80" Height="80"/>-->
+                                        <Image Source="appbar.basecircle.rest.png" Width="80" Height="80" />
+                                        <StackPanel Orientation="Vertical" Height="80">
+                                            <StackPanel Orientation="Horizontal" Height="40" MinWidth="240">
+                                                <TextBlock
+                                                    Text="{Binding ItemName}" FontSize="{StaticResource PhoneFontSizeLarge}"
+                                                    HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="40"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Height="40" MinWidth="240">
+                                                <TextBlock
+                                                    Text="{Binding ItemQuantity}" FontSize="{StaticResource PhoneFontSizeLarge}"
+                                                    VerticalAlignment="Center" HorizontalAlignment="Left" Height="40" Width="100"/>
+                                                <TextBlock
+                                                    Text="{Binding ItemExpiration}" FontSize="{StaticResource PhoneFontSizeLarge}"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"  Height="40"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Button
+                                            x:Name="deleteTaskButton" Click="deleteInventoryItemButton_Click" 
+                                            Height="100" Width="100"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Image Source="appbar.back.rest.png"/>
+                                        </Button> 
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </controls:PivotItem>
-            
-            <!--Pivot Add item-->
-            <controls:PivotItem Header="Add Item">
-                <Grid x:Name="AddItemPanel" Grid.Row="0" Margin="12,0,12,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <TextBox 
-                        Grid.Row="0" 
-                        Height="Auto" HorizontalAlignment="Stretch" Name="ItemNameTextBox" Text="Name of your item" 
-                        VerticalAlignment="Top" Width="Auto" GotFocus="newItemNameTextBox_GotFocus" />
-                    <TextBox 
-                        Grid.Row="1" 
-                        Height="Auto" HorizontalAlignment="Stretch" Name="ItemDescriptionTextBox" Text="Description" 
-                        VerticalAlignment="Top" Width="Auto" GotFocus="newItemDescriptionTextBox_GotFocus" />
-                    <TextBox 
-                        Grid.Row="2" 
-                        Height="Auto" HorizontalAlignment="Stretch" Name="ItemLocationTextBox" Text="Location" 
-                        VerticalAlignment="Top" Width="Auto" GotFocus="newItemLocationTextBox_GotFocus" />
-                    <TextBlock
-                        Grid.Row="3" Height="Auto" HorizontalAlignment="Left" Name="Quantity"
-                        Text="Quantity:" VerticalAlignment="Center" Width="Auto" FontSize="40" />
-                    <toolkit2:LoopingSelector
-                        x:Name="QuantityPicker" Grid.Row="3" Width="429" FontSize="64" Margin="2,3,3,2" ItemSize="100,100">
-                    </toolkit2:LoopingSelector>
-                    <TextBlock
-                        Grid.Row="4" Height="Auto" HorizontalAlignment="Left" Name="ExpirationDate"
-                        Text="Expiration Date:" VerticalAlignment="Center" Width="Auto" FontSize="40" />
-                    <toolkit:DatePicker
-                        x:Name="ExpirationDatePicker" Grid.Row="4" 
-                        Width="Auto" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    </toolkit:DatePicker>
-                    <Button 
-                        Content="Add Item" Click="newItemAddButton_Click"
-                        Grid.Row="5" Height="Auto" HorizontalAlignment="Center" 
-                        Name="ItemAddButton" VerticalAlignment="Center" Width="Auto" />
-                </Grid>
-            </controls:PivotItem>
-            
-            <!--Pivot item three-->
+                      
+            <!--Bing Map-Local Search-->
             <controls:PivotItem Header="Local Stores">
                 <Grid x:Name="MapPanel" Grid.Row="0">
                     <my:Map HorizontalAlignment="Stretch" Name="map" 
@@ -206,7 +115,7 @@
                 </Grid>
             </controls:PivotItem>
             
-            <!--Pivot Settings-->
+            <!--Settings(Set for Removal)-->
             <controls:PivotItem Header="Settings">
                 <Grid x:Name="SettingsPanel" Grid.Row="0">
                     
@@ -214,5 +123,18 @@
             </controls:PivotItem>
         </controls:Pivot>
     </Grid>
-
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton 
+                x:Name="appbarAddButton"
+                IconUri="appbar.add.rest.png"
+                Text="Add"
+                Click="appbarAddButton_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Button 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="Settings"/>
+                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

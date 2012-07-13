@@ -19,50 +19,16 @@ namespace PantryProtector
 {
     public partial class MainPage : PhoneApplicationPage, INotifyPropertyChanged
     {
-        private IntLoopingDataSource _quantityList = new IntLoopingDataSource() { MinValue = 1, MaxValue = 60, SelectedItem = 1 };
-        public IntLoopingDataSource QuantityList
-        {
-            get
-            {
-                return _quantityList;
-            }
-            set
-            {
-                if (_quantityList != value)
-                {
-                    _quantityList = value;
-                    NotifyPropertyChanged("QuantityList");
-                }
-            }
-        }
-        private ItemController itemController;
-        private ObservableCollection<Item> _items;
-        public ObservableCollection<Item> Items
-        {
-            get
-            {
-                return _items;
-            }
-            set
-            {
-                if (_items != value)
-                {
-                    _items = value;
-                    NotifyPropertyChanged("Items");
-                }
-            }
-        }
+        private ItemController itemController;          // Database adapter
 
-        // Constructor
+        /***********************************************************************
+         *                           Constructor
+         ***********************************************************************/
         public MainPage()
         {
             // Standard Silverlight initialization function
             InitializeComponent();
 
-            // Populate the Quantity List
-            this.QuantityPicker.DataSource = new IntLoopingDataSource() { MinValue = 1, MaxValue = 10, SelectedItem = 1 };
-            //for (int i = 0; i < 50; i++) _quantityList.Add(i);
-            
             // Create a controller to handle database transactions
             itemController = new ItemController();
 
@@ -70,70 +36,91 @@ namespace PantryProtector
             this.DataContext = this;
         }
 
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            // Collect all items in the database.
-            Items = itemController.CollectAllItemsInDB();
+        /***********************************************************************
+         *                      Shopping List Functionality
+         ***********************************************************************/
 
-            // Call the base method
-            base.OnNavigatedTo(e);
+        /* Collection of items in the Shopping List */
+        private ObservableCollection<Item> _itemsNeeded;
+        public ObservableCollection<Item> ItemsNeeded
+        {
+            get
+            {
+                return _itemsNeeded;
+            }
+            set
+            {
+                if (_itemsNeeded != value)
+                {
+                    _itemsNeeded = value;
+                    NotifyPropertyChanged("ItemsNeeded");
+                }
+            }
+        }
+
+        /* Add New Item to the Shopping List */
+        private void newShoppingListItemAddPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            string parameter = "Shopping List";
+            NavigationService.Navigate(new Uri(string.Format("/views/AddItem.xaml?parameter={0}", parameter), UriKind.Relative));
+        }
+
+        private void transferItemFromShoppingListHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+        }
+
+        /* Transfer item from Shopping List to Inventory */
+        private void transferItemFromShoppingListButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+
+            if (button != null)
+            {
+                // Get a handle for the item bound to the button.
+                Item itemForTransfer = button.DataContext as Item;
+
+                // Remove the item from the observable collection.
+                ItemsNeeded.Remove(itemForTransfer);
+
+                // Transfer the item to inventory
+                itemController.Transfer(itemForTransfer, "Inventory");
+
+                ItemsNotNeeded.Clear();
+                ItemsNotNeeded = itemController.CollectAllUnneededItemsInDB();
+            }
         }
 
         /***********************************************************************
-         *              Clear Text Boxes on Focus
+         *                      Inventory Functionality
          ***********************************************************************/
-        private void newItemNameTextBox_GotFocus(object sender, RoutedEventArgs e)
+
+        /* Collection of items in the inventory */
+        private ObservableCollection<Item> _itemsNotNeeded;
+        public ObservableCollection<Item> ItemsNotNeeded
         {
-            // Clear the text box when it gets focus.
-            ItemNameTextBox.Text = String.Empty;
+            get
+            {
+                return _itemsNotNeeded;
+            }
+            set
+            {
+                if (_itemsNotNeeded != value)
+                {
+                    _itemsNotNeeded = value;
+                    NotifyPropertyChanged("ItemsNotNeeded");
+                }
+            }
         }
 
-        private void newItemDescriptionTextBox_GotFocus(object sender, RoutedEventArgs e)
+        /* Add New Item to the inventory */
+        private void newInventoryItemAddPageButton_Click(object sender, RoutedEventArgs e)
         {
-            // Clear the text box when it gets focus.
-            ItemDescriptionTextBox.Text = String.Empty;
-        }
-        
-        private void newItemLocationTextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            // Clear the text box when it gets focus.
-            ItemLocationTextBox.Text = String.Empty;
+            string parameter = "Inventory";
+            NavigationService.Navigate(new Uri(string.Format("/views/AddItem.xaml?parameter={0}", parameter), UriKind.Relative));
         }
 
-        /***********************************************************************
-         *              Add New Item
-         ***********************************************************************/
-        private void newItemAddButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Create a new item based on the text box.
-            Item newItem = new Item {   ItemName = ItemNameTextBox.Text,
-                                        ItemDescription = ItemDescriptionTextBox.Text,
-                                        ItemLocation = ItemLocationTextBox.Text,
-                                        ItemExpiration = ExpirationDatePicker.ValueString};
-
-            // Add an item to the observable collection.
-            Items.Add(newItem);
-
-            // Add an item to the local database.
-            itemController.InsertItem(newItem);
-        }
-
-        /***********************************************************************
-         *              Navigating away
-         ***********************************************************************/
-        protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            // Call the base method.
-            base.OnNavigatedFrom(e);
-
-            // Save changes to the database.
-            itemController.SubmitChanges();
-        }
-
-        /***********************************************************************
-         *              Delete Item
-         ***********************************************************************/
-        private void deleteItemButton_Click(object sender, RoutedEventArgs e)
+        /* Delete inventory item from the inventory*/
+        private void deleteInventoryItemButton_Click(object sender, RoutedEventArgs e)
         {
             // Cast parameter as a button.
             var button = sender as Button;
@@ -144,14 +131,65 @@ namespace PantryProtector
                 Item itemForDelete = button.DataContext as Item;
 
                 // Remove the item from the observable collection.
-                Items.Remove(itemForDelete);
+                ItemsNotNeeded.Remove(itemForDelete);
 
                 // Remove the item from the local database.
                 itemController.DeleteItem(itemForDelete);
-                
+
                 // Put the focus back to the main page.
                 this.Focus();
             }
+        }
+
+        /* Transfer item from Inventory to Shopping List */
+        private void transferItemFromInventoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+
+            if (button != null)
+            {
+                // Get a handle for the item bound to the button.
+                Item itemForTransfer = button.DataContext as Item;
+
+                // Remove the item from the observable collection.
+                ItemsNeeded.Remove(itemForTransfer);
+
+                // Transfer the item to inventory
+                itemController.Transfer(itemForTransfer, "ShoppingList");
+
+                ItemsNeeded.Clear();
+                ItemsNeeded = itemController.CollectAllNeededItemsInDB();
+            }
+        }
+
+        /***********************************************************************
+         *              On Navigating to this page
+         ***********************************************************************/
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            // Collect all items in the database.
+            // Items = itemController.CollectAllItemsInDB();    // OBSOLETE
+
+            // Collect all items in the inventory
+            ItemsNotNeeded = itemController.CollectAllUnneededItemsInDB();
+
+            // Collect all items in the shopping list.
+            ItemsNeeded = itemController.CollectAllNeededItemsInDB();
+
+            // Call the base method
+            base.OnNavigatedTo(e);
+        }
+
+        /***********************************************************************
+         *                      Navigating away
+         ***********************************************************************/
+        protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            // Call the base method.
+            base.OnNavigatedFrom(e);
+
+            // Save changes to the database.
+            itemController.SubmitChanges();
         }
 
         #region INotifyPropertyChanged Members
@@ -174,9 +212,91 @@ namespace PantryProtector
 
         }
 
-        private void GroceryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /***********************************************************************
+         *                      Appbar Functions
+         ***********************************************************************/
+        private void appbarAddButton_Click(object sender, EventArgs e)
+        {
+            string parameter;
+            switch (PantryProtectorPivot.SelectedIndex)
+            {
+                case 0:
+                    parameter = "Shopping List";
+                    NavigationService.Navigate(new Uri(string.Format("/views/AddItem.xaml?parameter={0}", parameter), UriKind.Relative));
+                    break;
+                case 1:
+                    parameter = "Inventory";
+                    NavigationService.Navigate(new Uri(string.Format("/views/AddItem.xaml?parameter={0}", parameter), UriKind.Relative));
+                    break;
+                case 2:
+                    // Map
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ShoppingListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+
+        /***********************************************************************
+         *                              Gestures
+         ***********************************************************************/
+        private void ItemGestureListener_Hold(object sender, Microsoft.Phone.Controls.GestureEventArgs e)
+        {
+            
+        }
+
+        private void ItemEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            string parameter;
+            switch (PantryProtectorPivot.SelectedIndex)
+            {
+                case 0:
+                    parameter = "Shopping List";
+                    NavigationService.Navigate(new Uri(string.Format("/views/EditItem.xaml?parameter={0}", parameter), UriKind.Relative));
+                    break;
+                case 1:
+                    parameter = "Inventory";
+                    NavigationService.Navigate(new Uri(string.Format("/views/EditItem.xaml?parameter={0}", parameter), UriKind.Relative));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ItemDeleteMenu_Click(object sender, RoutedEventArgs e)
+        {
+            
+            MenuItem menuItem = (MenuItem) sender;
+
+            if (menuItem != null)
+            {
+                // Get a handle for the item bound to the button.
+                Item itemForDelete = menuItem.DataContext as Item;
+
+                // Remove the item from the observable collection.
+                ItemsNotNeeded.Remove(itemForDelete);
+
+                // Remove the item from the local database.
+                itemController.DeleteItem(itemForDelete);
+
+                // Refresh the list
+                switch (PantryProtectorPivot.SelectedIndex)
+                {
+                    case 0:
+                        ItemsNeeded = itemController.CollectAllNeededItemsInDB();
+                        break;
+                    case 1:
+                        ItemsNotNeeded = itemController.CollectAllUnneededItemsInDB();
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }       
 }

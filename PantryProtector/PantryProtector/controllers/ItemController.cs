@@ -22,59 +22,89 @@ namespace PantryProtector
         // Data context for the lcoal database
         private ItemDataContext itemDB;
 
+        /***********************************************************************
+         *                          Constructor
+         ***********************************************************************/
         public ItemController()
         {
             // Connect to the database and instantiate data context
             itemDB = new ItemDataContext(ItemDataContext.DBConnectionString);
-
-            // Data context and observable collection are children of the controller
-            //this.DataContext = this;
         }
 
-        // Return a copy of all items in the database.
+        /***********************************************************************
+         *                  Collection of All Items in DB
+         ***********************************************************************/
         public ObservableCollection<Item> CollectAllItemsInDB()
         {
+            // Select statement to grab all items.
             var itemsInDB = from Item item in itemDB.Items select item;
+
+            // Query the select and return the collection.
+            return new ObservableCollection<Item>(itemsInDB);
+        }
+
+        /***********************************************************************
+         *              Collection of All Items in Shopping List
+         ***********************************************************************/
+        public ObservableCollection<Item> CollectAllNeededItemsInDB()
+        {
+            var itemsInDB = from Item item in itemDB.Items
+                            where item.ItemInShoppingList == true
+                            select item;
 
             return new ObservableCollection<Item>(itemsInDB);
         }
 
-        // Insert a new item into the database
-        public Boolean InsertItem(Item newItem)
+        /***********************************************************************
+         *                Collection of All Items in Inventory
+         ***********************************************************************/
+        public ObservableCollection<Item> CollectAllUnneededItemsInDB()
         {
             var itemsInDB = from Item item in itemDB.Items
-                            where item.ItemName.Equals(newItem.ItemName)
+                            where item.ItemInShoppingList == false
                             select item;
-            // If no duplicate entires exist, create a new item
-            if (itemsInDB.Count() == 0)
-            {
-                // Insert the new item.
-                itemDB.Items.InsertOnSubmit(newItem);
 
-                // Save the changes
-                SubmitChanges();
-
-                return true;
-            }
-            // Else we already have an entry, so add the quantities.
-            else
-            {
-                // Add the quantities together
-                Item item = itemsInDB.First();
-                item.ItemQuantity += newItem.ItemQuantity;
-
-                // Save the changes
-                SubmitChanges();
-
-                return true;
-            }
-            // Add item to the database
-
-            // We should never reach this.
-            return false;
+            return new ObservableCollection<Item>(itemsInDB);
         }
 
-        // Remove an item from the database
+        /***********************************************************************
+         *                     Insert New Item into DB
+         ***********************************************************************/
+        public Boolean InsertItem(Item newItem)
+        {
+            itemDB.Items.InsertOnSubmit(newItem);
+
+            // Save the changes
+            SubmitChanges();
+
+            return true;
+        }
+
+        /***********************************************************************
+         *                          Transfer Item
+         ***********************************************************************/
+        public Boolean Transfer(Item newItem, string table)
+        {
+            bool inSL = false;                          // initial state is false, item is in inventory or will be transferred here
+            if (table == "ShoppingList") inSL = true;   // set to true if ShoppingList is pased as table, item transfered to Shopping List
+            
+            // Query for the item.
+            IQueryable<Item> itemQuery = from Item item in itemDB.Items
+                                         where item.ItemName == newItem.ItemName
+                                         select item;
+            
+            // Perform update on entry
+            Item itemToUpdate = itemQuery.FirstOrDefault();
+            itemToUpdate.ItemInShoppingList = inSL;
+
+            SubmitChanges();
+
+            return true;
+        }
+
+        /***********************************************************************
+         *                       Remove Item from DB
+         ***********************************************************************/
         public void DeleteItem(Item itemForDelete)
         {
             // Remove the item from the database
@@ -84,12 +114,17 @@ namespace PantryProtector
             itemDB.SubmitChanges();
         }
 
-        // Save changes to the database
+        /***********************************************************************
+         *                       Save Changes to DB
+         ***********************************************************************/
         public void SubmitChanges()
         {
             itemDB.SubmitChanges();
         }
 
+        /***********************************************************************
+         *                        Region: Notify
+         ***********************************************************************/
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
